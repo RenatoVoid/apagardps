@@ -1,58 +1,37 @@
 <?php
 /**
- * Security.php
- * Módulo de Criptografia Assimétrica (RSA)
- * Padrão Fiscal: Máxima Segurança.
+ * Security.php - Versão Flexível
  */
 class Security {
     
-    // Caminho para os arquivos de chave (ajuste se mudar de pasta)
+    // Caminho da chave PÚBLICA (Fica no servidor para cadastrar)
     private static $publicKeyPath = 'public.key';
-    private static $privateKeyPath = 'private.key';
 
-    /**
-     * O CAMINHO DE IDA: Usa a Chave PÚBLICA
-     * Qualquer um pode criptografar, mas ninguém (nem o código) consegue reverter sem a privada.
-     */
+    // Criptografa (Ida) - Usa o arquivo do servidor
     public static function encrypt(string $data): string {
         if (!file_exists(self::$publicKeyPath)) {
-            die("Erro Crítico: Arquivo public.key não encontrado.");
+            return "Erro: public.key ausente";
         }
-
         $publicKey = file_get_contents(self::$publicKeyPath);
         $keyResource = openssl_get_publickey($publicKey);
+        if (!$keyResource) return "Erro: Chave pública inválida";
 
-        if (!$keyResource) {
-            die("Erro: Chave pública inválida.");
-        }
-
-        // Criptografa (RSA tem limite de tamanho, ideal para senhas e dados curtos)
         $encrypted = '';
         if (openssl_public_encrypt($data, $encrypted, $keyResource)) {
             return base64_encode($encrypted);
         }
-
-        return "Erro na encriptação";
+        return "Erro Encrypt";
     }
 
-    /**
-     * O CAMINHO DE VOLTA: Usa a Chave PRIVADA
-     * Somente quem tem o arquivo private.key consegue ler.
-     */
-    public static function decrypt(string $data): ?string {
-        if (!file_exists(self::$privateKeyPath)) {
-            // Se o arquivo não existir, retorna nulo (simula que não dá pra ler)
-            return null; 
-        }
-
-        $privateKey = file_get_contents(self::$privateKeyPath);
-        $keyResource = openssl_get_privatekey($privateKey);
+    // Descriptografa (Volta) - Usa uma chave STRING (Upload)
+    public static function decryptWithKey(string $data_base64, string $privateKeyString): ?string {
+        $keyResource = openssl_get_privatekey($privateKeyString);
 
         if (!$keyResource) {
-            return null;
+            return null; // Chave errada ou inválida
         }
 
-        $decoded = base64_decode($data);
+        $decoded = base64_decode($data_base64);
         $decrypted = '';
 
         if (openssl_private_decrypt($decoded, $decrypted, $keyResource)) {

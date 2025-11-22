@@ -1,68 +1,56 @@
 <?php
 session_start();
 require_once "config.php";
-require_once "Security.php"; // Inclusão da nova classe
+require_once "Security.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Sanitização básica
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $senha = $_POST['senha'] ?? '';
-    $confirma_senha = $_POST['confirma_senha'] ?? '';
+    $confirma = $_POST['confirma_senha'] ?? '';
 
-    // 1. Validações
-    if (empty($email) || empty($senha) || empty($confirma_senha)) {
-        $_SESSION['erro_cadastro'] = "Todos os campos devem ser preenchidos.";
+    if (empty($email) || empty($senha) || $senha !== $confirma) {
+        $_SESSION['erro_cadastro'] = "Dados inválidos ou senhas não conferem.";
         header("Location: cadastro.php");
         exit();
     }
 
-    if ($senha !== $confirma_senha) {
-        $_SESSION['erro_cadastro'] = "A senha e a confirmação de senha não coincidem.";
+    // Verifica duplicidade
+    $stmt = $conexao->prepare("SELECT id FROM usuarios WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    if ($stmt->num_rows > 0) {
+        $_SESSION['erro_cadastro'] = "E-mail já cadastrado.";
         header("Location: cadastro.php");
         exit();
     }
-
-    // 2. Verifica duplicidade
-    $sql_check = "SELECT id FROM usuarios WHERE email = ?";
-    if ($stmt_check = $conexao->prepare($sql_check)) {
-        $stmt_check->bind_param("s", $email);
-        $stmt_check->execute();
-        $stmt_check->store_result();
-        
-        if ($stmt_check->num_rows >= 1) {
-            $_SESSION['erro_cadastro'] = "Este e-mail já está cadastrado.";
-            $stmt_check->close();
-            header("Location: cadastro.php");
-            exit();
-        }
-        $stmt_check->close();
-    }
+    $stmt->close();
     
-    // 3. CRIPTOGRAFIA (Caminho de Ida)
-    // Usamos nossa classe Security ao invés de password_hash
-    $senha_segura = Security::encrypt($senha);
-
-    // 4. Inserção no Banco
-    $sql_insert = "INSERT INTO usuarios (email, senha) VALUES (?, ?)";
+    // --- A MÁGICA HÍBRIDA ---
     
-    if ($stmt_insert = $conexao->prepare($sql_insert)) {
-        $stmt_insert->bind_param("ss", $email, $senha_segura);
+    // 1. HASH (Para Login - Irreversível)
+    $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+
+    // 2. CRIPTOGRAFIA RSA (Para o Relatório PDF - Reversível com a chave)
+    $senha_para_relatorio = Security::encrypt($senha);
+
+    // Salva os dois no banco + Data Agora
+    $agora = date("Y-m-d H:i:s");
+    $sql = "INSERT INTO usuarios (email, senha, senha_backup, data_criacao) VALUES (?, ?, ?, ?)";
+    
+    if ($insert = $conexao->prepare($sql)) {
+        // ssss = 4 strings
+        $insert->bind_param("ssss", $email, $senha_hash, $senha_para_relatorio, $agora);
         
-        if ($stmt_insert->execute()) {
-            $_SESSION['sucesso_cadastro'] = "Cadastro realizado! Sua senha foi protegida.";
+        if ($insert->execute()) {
+            $_SESSION['sucesso_cadastro'] = "Conta criada com dupla camada de segurança!";
         } else {
-            $_SESSION['erro_cadastro'] = "Erro interno ao cadastrar.";
-            // Log silencioso do erro real para o admin do servidor
-            error_log("MySQL Error: " . $conexao->error);
+            $_SESSION['erro_cadastro'] = "Erro ao registrar.";
         }
-        $stmt_insert->close();
+        $insert->close();
     }
     
     $conexao->close();
-    header("Location: cadastro.php");
-    exit();
-} else {
     header("Location: cadastro.php");
     exit();
 }
