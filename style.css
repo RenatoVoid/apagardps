@@ -1,0 +1,273 @@
+/* ================================================= */
+/* NOVO CSS: Minimalista e Monocromático (Grayscale) */
+/* ================================================= */
+
+/* 1. Estilos Globais e do Corpo (Body) */
+/* Usa branco para o conteúdo e cinza claro para o fundo geral */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8; /* Fundo muito claro */
+    color: #333; /* Cor principal do texto */
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    
+    /* CONFIGURAÇÃO ESSENCIAL PARA STICKY FOOTER */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Estilo para as telas de login/cadastro (usa flexbox para centralizar) */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f0f0f0; /* Fundo neutro e sem degradê */
+    margin: 0;
+}
+
+/* ==================================== */
+/* 2. Estilos de Layout (Header, Main, Footer) */
+/* ==================================== */
+
+header {
+    background-color: #1e1e1e; /* Preto suave (Dark Mode para Header) */
+    color: white;
+    padding: 20px;
+    border-bottom: 1px solid #555; /* Borda sutil */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    flex-grow: 1; 
+    padding: 30px 20px; 
+    max-width: 1000px; 
+    margin: 20px auto;
+    background-color: white;
+    /* Sombra muito leve e discreta */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); 
+    border-radius: 4px; /* Bordas levemente mais sutis */
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #1e1e1e; /* Mesma cor do Header */
+    color: white;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+
+/* ==================================== */
+/* 3. Estilos do Formulário de Login/Cadastro/2FA */
+/* ==================================== */
+.login-container {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 4px;
+    /* Sombra discreta e elegante */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    border: 1px solid #ddd; /* Borda fina para definir o limite */
+}
+
+.login-container h1 {
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 24px;
+    letter-spacing: 0.5px; /* Detalhe tipográfico */
+}
+
+.input-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500; /* Levemente menos negrito */
+    color: #333;
+}
+
+.input-group input[type="email"],
+.input-group input[type="password"],
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    box-sizing: border-box; 
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #555; /* Foco monocromático mais escuro */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.2); /* Sombra de foco sutil */
+}
+
+/* Estilo para o botão principal */
+.login-container button[type="submit"] {
+    width: 100%;
+    background-color: #444; /* Cinza escuro para a ação principal */
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+.login-container button[type="submit"]:hover {
+    background-color: #111; /* Preto para o hover */
+}
+
+
+/* ==================================== */
+/* 4. Estilos de Mensagens (Erro/Sucesso) - Usando tons de cinza */
+/* ==================================== */
+
+.mensagem-erro {
+    color: #333; /* Texto escuro */
+    background-color: #fcebeb; /* Cinza muito claro com leve tom vermelho (sinal de alerta) */
+    border: 1px solid #777; /* Borda em cinza de destaque */
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.mensagem-sucesso {
+    color: #333; /* Texto escuro */
+    background-color: #e6f6ee; /* Cinza muito claro com leve tom verde (sinal de sucesso) */
+    border: 1px solid #777;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+/* Estilo para links de navegação */
+.link-cadastro {
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.link-cadastro a {
+    color: #444; /* Link em cinza de destaque */
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.link-cadastro a:hover {
+    color: #111;
+    text-decoration: underline;
+}
+
+/* ==================================== */
+/* 5. Estilos da Dashboard (index.php) */
+/* ==================================== */
+
+.header-saudacao {
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+.header-saudacao i {
+    font-size: 28px;
+}
+
+.btn-logout {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border: 1px solid #aaa; /* Borda mais clara */
+    border-radius: 2px;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.btn-logout:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+.saudacao-principal {
+    background-color: #f0f0f0; /* Cinza claro para o bloco de saudação */
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+    font-size: 1.1em;
+    color: #333; 
+}
+
+/* Container de Cards (Flexbox) */
+.info-cards {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 1; 
+    min-width: 300px;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+    border: 1px solid #ddd;
+}
+
+.card:hover {
+    transform: translateY(-3px); /* Movimento mais sutil */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card i {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: #555; /* Ícones em cinza de destaque */
+}
+
+/* Estilos Monocromáticos para os Cards */
+.info-php {
+    background-color: #f9f9f9; 
+    border-left: 5px solid #555; /* Acento de cor monocromático */
+}
+
+.info-time {
+    background-color: #f9f9f9;
+    border-left: 5px solid #555;
+}
+
+.info-php i, .info-time i {
+    color: #555;
+}
+
+/* Regras antigas não utilizadas (ajustadas para monocromático, caso usadas) */
+.php-info {
+    border: 1px dashed #555;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
