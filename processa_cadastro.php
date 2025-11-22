@@ -1,27 +1,29 @@
 <?php
 session_start();
-require_once "config.php"; 
+require_once "config.php";
+require_once "Security.php"; // Inclusão da nova classe
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    $email = trim($_POST['email']);
-    $senha = $_POST['senha'];
-    $confirma_senha = $_POST['confirma_senha'];
+    // Sanitização básica
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $senha = $_POST['senha'] ?? '';
+    $confirma_senha = $_POST['confirma_senha'] ?? '';
 
-    // 1. Validação Simples
+    // 1. Validações
     if (empty($email) || empty($senha) || empty($confirma_senha)) {
         $_SESSION['erro_cadastro'] = "Todos os campos devem ser preenchidos.";
         header("Location: cadastro.php");
         exit();
     }
-    
+
     if ($senha !== $confirma_senha) {
         $_SESSION['erro_cadastro'] = "A senha e a confirmação de senha não coincidem.";
         header("Location: cadastro.php");
         exit();
     }
 
-    // 2. Verifica se o e-mail já existe
+    // 2. Verifica duplicidade
     $sql_check = "SELECT id FROM usuarios WHERE email = ?";
     if ($stmt_check = $conexao->prepare($sql_check)) {
         $stmt_check->bind_param("s", $email);
@@ -37,26 +39,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt_check->close();
     }
     
-    // 3. Criptografia da Senha (OBRIGATÓRIO para segurança)
-    $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+    // 3. CRIPTOGRAFIA (Caminho de Ida)
+    // Usamos nossa classe Security ao invés de password_hash
+    $senha_segura = Security::encrypt($senha);
 
-    // 4. Inserção do novo usuário
+    // 4. Inserção no Banco
     $sql_insert = "INSERT INTO usuarios (email, senha) VALUES (?, ?)";
     
     if ($stmt_insert = $conexao->prepare($sql_insert)) {
-        $stmt_insert->bind_param("ss", $email, $senha_hash);
+        $stmt_insert->bind_param("ss", $email, $senha_segura);
         
         if ($stmt_insert->execute()) {
-            $_SESSION['sucesso_cadastro'] = "Usuário cadastrado com sucesso! Use seu e-mail e senha para prosseguir.";
+            $_SESSION['sucesso_cadastro'] = "Cadastro realizado! Sua senha foi protegida.";
         } else {
-            $_SESSION['erro_cadastro'] = "Ocorreu um erro ao tentar cadastrar o usuário: " . $conexao->error;
+            $_SESSION['erro_cadastro'] = "Erro interno ao cadastrar.";
+            // Log silencioso do erro real para o admin do servidor
+            error_log("MySQL Error: " . $conexao->error);
         }
-        
         $stmt_insert->close();
     }
     
     $conexao->close();
-    
     header("Location: cadastro.php");
     exit();
 } else {

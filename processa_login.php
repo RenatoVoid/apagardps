@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "config.php";
+require_once "Security.php"; // Importante: Garanta que este arquivo existe
 
 // ===========================================
 // INCLUSÕES PHPMailer
@@ -28,11 +29,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->store_result();
         
         if ($stmt->num_rows == 1) {
-            $stmt->bind_result($id, $email_db, $senha_hash);
+            // Busca a senha criptografada do banco
+            $stmt->bind_result($id, $email_db, $senha_criptografada_db);
             $stmt->fetch();
             
-            // CORREÇÃO AQUI: Força o $senha_hash a ser string e verifica se não está vazio
-            if (!empty($senha_hash) && password_verify($senha_digitada, (string)$senha_hash)) {
+            // ---------------------------------------------------------
+            // DESCRIPTOGRAFIA E VERIFICAÇÃO (Caminho de Volta)
+            // ---------------------------------------------------------
+            // CORREÇÃO AQUI: O (string) força o tipo e resolve o erro P1006
+            $senha_original_banco = Security::decrypt((string)$senha_criptografada_db);
+            
+            // Verifica se a descriptografia funcionou E se a senha bate exatamente
+            if ($senha_original_banco !== null && $senha_digitada === $senha_original_banco) {
                 
                 // ---------------------------------------------------------
                 // VERIFICAÇÃO DE DISPOSITIVO CONFIÁVEL (COOKIE)
@@ -44,7 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $agora = date("Y-m-d H:i:s");
 
                     // Verifica se o token do cookie existe no banco e não expirou
-                    // Importante: Usamos uma nova variável $stmt_token para não conflitar com a anterior
                     $sql_token = "SELECT id FROM dispositivos_confiaveis WHERE usuario_id = ? AND token_hash = ? AND expira_em > ?";
                     if ($stmt_token = $conexao->prepare($sql_token)) {
                         $stmt_token->bind_param("iss", $id, $token_cookie, $agora);
